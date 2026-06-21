@@ -1,10 +1,9 @@
-import { Response } from "express";
 import prisma from "../../config/prisma";
 import { AppError } from "../../utils/AppError";
 
 type SeatEventClient = {
   id: string;
-  response: Response;
+  send: (payload: string) => void;
 };
 
 const clientsByShowtime = new Map<number, SeatEventClient[]>();
@@ -114,15 +113,20 @@ export async function releaseSeat(showtimeId: number, seatNumber: string, client
   await broadcastSeatLocks(showtimeId);
 }
 
-export function addSeatEventClient(showtimeId: number, clientId: string, response: Response) {
+export function addSeatEventClient(
+  showtimeId: number,
+  clientId: string,
+  send: (payload: string) => void,
+  onClose: (removeClient: () => void) => void,
+) {
   const clients = clientsByShowtime.get(showtimeId) ?? [];
   clients.push({
     id: clientId,
-    response,
+    send,
   });
   clientsByShowtime.set(showtimeId, clients);
 
-  response.on("close", () => {
+  onClose(() => {
     const remainingClients = (clientsByShowtime.get(showtimeId) ?? []).filter(
       (client) => client.id !== clientId,
     );
@@ -144,9 +148,12 @@ export async function broadcastSeatLocks(showtimeId: number) {
   }
 
   const locks = await getSeatLocks(showtimeId);
-  const eventPayload = `data: ${JSON.stringify({ locks })}\n\n`;
+  const eventPayload = JSON.stringify({
+    type: "seat-locks",
+    locks,
+  });
 
   for (const client of clients) {
-    client.response.write(eventPayload);
+    client.send(eventPayload);
   }
 }

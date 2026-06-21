@@ -100,6 +100,35 @@ export function MovieBookingScreen() {
       selectedSeatNumbers.length > 0,
   );
 
+  function proceedToFoodAndBeverage() {
+    if (
+      !movieId ||
+      !selectedTicketType ||
+      !selectedLocation ||
+      !selectedHall ||
+      !selectedDate ||
+      !selectedTime ||
+      selectedSeatNumbers.length === 0
+    ) {
+      return;
+    }
+
+    router.push({
+      pathname: "/movies/booking/food-and-beverage/[id]",
+      params: {
+        id: String(movieId),
+        ticketType: selectedTicketType.label,
+        location: selectedLocation.name,
+        hall: selectedHall.name,
+        date: selectedDate.date,
+        time: selectedTime.startTime,
+        showtimeId: String(selectedTime.id),
+        seats: selectedSeatNumbers.join(","),
+        ticketTotal: String(selectedSeatNumbers.length * 2500),
+      },
+    });
+  }
+
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
@@ -260,7 +289,8 @@ export function MovieBookingScreen() {
               </Pressable>
               <Pressable
                 style={[styles.proceedButton, !canProceed && styles.disabledProceed]}
-                disabled={!canProceed}>
+                disabled={!canProceed}
+                onPress={proceedToFoodAndBeverage}>
                 <Text style={styles.proceedText}>Proceed</Text>
               </Pressable>
             </View>

@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.listSeatLocks = listSeatLocks;
 exports.storeSeatLock = storeSeatLock;
 exports.destroySeatLock = destroySeatLock;
-exports.streamSeatLocks = streamSeatLocks;
 const AppError_1 = require("../../utils/AppError");
 const seat_service_1 = require("./seat.service");
 function parseShowtimeId(value) {
@@ -64,22 +63,5 @@ async function destroySeatLock(req, res, next) {
     }
     catch (error) {
         return next(error);
-    }
-}
-async function streamSeatLocks(req, res, next) {
-    try {
-        const showtimeId = parseShowtimeId(req.params.showtimeId);
-        const clientId = parseClientId(req.query.clientId);
-        const locks = await (0, seat_service_1.getSeatLocks)(showtimeId);
-        res.writeHead(200, {
-            "Cache-Control": "no-cache",
-            Connection: "keep-alive",
-            "Content-Type": "text/event-stream",
-        });
-        res.write(`data: ${JSON.stringify({ locks })}\n\n`);
-        (0, seat_service_1.addSeatEventClient)(showtimeId, clientId, res);
-    }
-    catch (error) {
-        next(error);
     }
 }

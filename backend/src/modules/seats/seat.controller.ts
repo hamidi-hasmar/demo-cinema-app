@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "../../utils/AppError";
 import {
-  addSeatEventClient,
   getSeatLocks,
   lockSeat,
   releaseSeat,
@@ -95,28 +94,5 @@ export async function destroySeatLock(
     });
   } catch (error) {
     return next(error);
-  }
-}
-
-export async function streamSeatLocks(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const showtimeId = parseShowtimeId(req.params.showtimeId);
-    const clientId = parseClientId(req.query.clientId);
-    const locks = await getSeatLocks(showtimeId);
-
-    res.writeHead(200, {
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-      "Content-Type": "text/event-stream",
-    });
-
-    res.write(`data: ${JSON.stringify({ locks })}\n\n`);
-    addSeatEventClient(showtimeId, clientId, res);
-  } catch (error) {
-    next(error);
   }
 }

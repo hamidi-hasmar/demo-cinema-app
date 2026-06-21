@@ -85,3 +85,35 @@ export type SeatLocksResponse = {
     locks: SeatLock[];
   };
 };
+
+export type ConcessionCategory = "food" | "beverage" | "combo";
+
+export type ConcessionItem = {
+  id: number;
+  name: string;
+  description: string;
+  category: ConcessionCategory;
+  price: number;
+};
+
+export type ConcessionItemsResponse = {
+  success: boolean;
+  data: ConcessionItem[];
+};
+
+export type SelectedConcessionItem = ConcessionItem & {
+  quantity: number;
+};
+
+export type BookingSummaryParams = {
+  movieId: string;
+  ticketType: string;
+  location: string;
+  hall: string;
+  date: string;
+  time: string;
+  showtimeId: string;
+  seats: string;
+  ticketTotal: string;
+  concessions?: string;
+};

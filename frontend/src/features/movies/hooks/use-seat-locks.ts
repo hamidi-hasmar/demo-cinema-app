@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { createSeatEvents, fetchSeatLocks, lockSeat, releaseSeat } from "../api/movie-api";
+import { createSeatSocket, fetchSeatLocks, lockSeat, releaseSeat } from "../api/movie-api";
 import { SeatLock } from "../types";
 
 export function useSeatLocks(showtimeId: number | null) {
@@ -34,28 +34,52 @@ export function useSeatLocks(showtimeId: number | null) {
       return;
     }
 
-    const events = createSeatEvents(showtimeId, clientId);
+    const socket = createSeatSocket(showtimeId, clientId);
 
-    if (!events) {
+    if (!socket) {
       const intervalId = setInterval(reload, 2500);
       return () => clearInterval(intervalId);
     }
 
-    events.onmessage = (event) => {
+    let isActive = true;
+
+    socket.onmessage = (event) => {
+      if (!isActive) {
+        return;
+      }
+
       try {
-        const payload = JSON.parse(event.data) as { locks: SeatLock[] };
-        setLocks(payload.locks);
+        const payload = JSON.parse(String(event.data)) as {
+          type: string;
+          locks: SeatLock[];
+        };
+
+        if (payload.type === "seat-locks") {
+          setLocks(payload.locks);
+        }
+
         setError(null);
       } catch {
         setError("Unable to read live seat updates");
       }
     };
 
-    events.onerror = () => {
-      setError("Live seat updates disconnected");
+    socket.onerror = () => {
+      if (isActive) {
+        setError("Live seat updates disconnected");
+      }
     };
 
-    return () => events.close();
+    socket.onclose = () => {
+      if (isActive) {
+        setError("Live seat updates disconnected");
+      }
+    };
+
+    return () => {
+      isActive = false;
+      socket.close();
+    };
   }, [clientId, reload, showtimeId]);
 
   const toggleSeat = useCallback(

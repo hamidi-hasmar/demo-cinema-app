@@ -96,14 +96,14 @@ async function releaseSeat(showtimeId, seatNumber, clientId) {
     });
     await broadcastSeatLocks(showtimeId);
 }
-function addSeatEventClient(showtimeId, clientId, response) {
+function addSeatEventClient(showtimeId, clientId, send, onClose) {
     const clients = clientsByShowtime.get(showtimeId) ?? [];
     clients.push({
         id: clientId,
-        response,
+        send,
     });
     clientsByShowtime.set(showtimeId, clients);
-    response.on("close", () => {
+    onClose(() => {
         const remainingClients = (clientsByShowtime.get(showtimeId) ?? []).filter((client) => client.id !== clientId);
         if (remainingClients.length === 0) {
             clientsByShowtime.delete(showtimeId);
@@ -118,8 +118,11 @@ async function broadcastSeatLocks(showtimeId) {
         return;
     }
     const locks = await getSeatLocks(showtimeId);
-    const eventPayload = `data: ${JSON.stringify({ locks })}\n\n`;
+    const eventPayload = JSON.stringify({
+        type: "seat-locks",
+        locks,
+    });
     for (const client of clients) {
-        client.response.write(eventPayload);
+        client.send(eventPayload);
     }
 }

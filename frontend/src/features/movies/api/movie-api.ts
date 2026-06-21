@@ -2,6 +2,7 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 import {
+  ConcessionItemsResponse,
   MovieBookingOptionsResponse,
   MovieListResponse,
   MovieResponse,
@@ -26,6 +27,14 @@ function getApiBaseUrl() {
 }
 
 const API_BASE_URL = getApiBaseUrl();
+
+function getSocketBaseUrl() {
+  if (API_BASE_URL.startsWith("https://")) {
+    return API_BASE_URL.replace(/^https:\/\//, "wss://");
+  }
+
+  return API_BASE_URL.replace(/^http:\/\//, "ws://");
+}
 
 export async function fetchMovies() {
   const response = await fetch(`${API_BASE_URL}/api/movies`);
@@ -125,14 +134,30 @@ export async function releaseSeat(showtimeId: number, seatNumber: string, client
   }
 }
 
-export function createSeatEvents(showtimeId: number, clientId: string) {
-  if (typeof EventSource === "undefined") {
+export function createSeatSocket(showtimeId: number, clientId: string) {
+  if (typeof WebSocket === "undefined") {
     return null;
   }
 
-  return new EventSource(
-    `${API_BASE_URL}/api/showtimes/${showtimeId}/seats/events?clientId=${encodeURIComponent(
+  return new WebSocket(
+    `${getSocketBaseUrl()}/api/showtimes/${showtimeId}/seats/ws?clientId=${encodeURIComponent(
       clientId,
     )}`,
   );
+}
+
+export async function fetchConcessionItems() {
+  const response = await fetch(`${API_BASE_URL}/api/concessions`);
+
+  if (!response.ok) {
+    throw new Error("Unable to load food and beverages");
+  }
+
+  const result = (await response.json()) as ConcessionItemsResponse;
+
+  if (!result.success) {
+    throw new Error("Unable to load food and beverages");
+  }
+
+  return result.data;
 }
