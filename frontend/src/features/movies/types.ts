@@ -117,3 +117,44 @@ export type BookingSummaryParams = {
   ticketTotal: string;
   concessions?: string;
 };
+
+export type BookingTransactionPayload = {
+  showtimeId: number;
+  ticketType: string;
+  location: string;
+  cinemaHall: string;
+  showDate: string;
+  startTime: string;
+  seats: string[];
+  concessions: SelectedConcessionItem[];
+  ticketTotal: number;
+  concessionTotal: number;
+  grandTotal: number;
+  paymentMethod: string;
+  cardNumber?: string;
+};
+
+export type BookingTransaction = {
+  id: number;
+  reference: string;
+  showtimeId: number;
+  ticketType: string;
+  location: string;
+  cinemaHall: string;
+  showDate: string;
+  startTime: string;
+  seats: string;
+  concessions: string;
+  ticketTotal: number;
+  concessionTotal: number;
+  grandTotal: number;
+  paymentMethod: string;
+  cardLastFour: string;
+  status: string;
+  createdAt: string;
+};
+
+export type BookingTransactionResponse = {
+  success: boolean;
+  data: BookingTransaction;
+};

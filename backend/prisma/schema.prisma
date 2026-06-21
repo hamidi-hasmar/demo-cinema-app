@@ -50,6 +50,7 @@ model Showtime {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   seatLocks  SeatLock[]
+  transactions BookingTransaction[]
 
   @@unique([movieId, location, cinemaHall, showDate, startTime])
 }
@@ -65,4 +66,26 @@ model SeatLock {
   updatedAt  DateTime @updatedAt
 
   @@unique([showtimeId, seatNumber])
+}
+
+model BookingTransaction {
+  id            Int      @id @default(autoincrement())
+  reference     String   @unique
+  showtimeId    Int
+  showtime      Showtime @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  ticketType    String
+  location      String
+  cinemaHall    String
+  showDate      DateTime
+  startTime     String
+  seats         String
+  concessions   String   @default("[]")
+  ticketTotal   Int
+  concessionTotal Int
+  grandTotal    Int
+  paymentMethod String
+  cardLastFour  String   @default("")
+  status        String   @default("PAID")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

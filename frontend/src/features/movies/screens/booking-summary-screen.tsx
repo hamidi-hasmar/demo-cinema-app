@@ -48,13 +48,17 @@ function parseConcessions(value: string) {
 
 export function BookingSummaryScreen() {
   const params = useLocalSearchParams<{
+    id?: string;
     ticketType?: string;
     location?: string;
     hall?: string;
     date?: string;
     time?: string;
+    showtimeId?: string;
     seats?: string;
     ticketTotal?: string;
+    concessionTotal?: string;
+    grandTotal?: string;
     concessions?: string;
   }>();
   const ticketTotal = Number(readParam(params.ticketTotal)) || 0;
@@ -68,6 +72,26 @@ export function BookingSummaryScreen() {
   );
   const grandTotal = ticketTotal + foodTotal;
   const seats = readParam(params.seats);
+
+  function proceedToPayment() {
+    router.push({
+      pathname: "/movies/booking/payment/[id]",
+      params: {
+        id: readParam(params.id),
+        ticketType: readParam(params.ticketType),
+        location: readParam(params.location),
+        hall: readParam(params.hall),
+        date: readParam(params.date),
+        time: readParam(params.time),
+        showtimeId: readParam(params.showtimeId),
+        seats,
+        ticketTotal: String(ticketTotal),
+        concessionTotal: String(foodTotal),
+        grandTotal: String(grandTotal),
+        concessions: readParam(params.concessions),
+      },
+    });
+  }
 
   return (
     <View style={styles.root}>
@@ -137,11 +161,8 @@ export function BookingSummaryScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          <Pressable style={styles.cancelButton} onPress={() => router.back()}>
-            <Text style={styles.cancelText}>Back</Text>
-          </Pressable>
-          <Pressable style={styles.confirmButton}>
-            <Text style={styles.confirmText}>Confirm</Text>
+          <Pressable style={styles.confirmButton} onPress={proceedToPayment}>
+            <Text style={styles.confirmText}>Proceed to Payment</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -365,23 +386,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 14,
   },
-  cancelButton: {
-    flex: 1,
-    maxWidth: 178,
-    height: 48,
-    borderRadius: 4,
-    backgroundColor: "#ffffff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cancelText: {
-    color: "#080808",
-    fontSize: 18,
-    fontWeight: "900",
-  },
   confirmButton: {
-    flex: 1,
-    maxWidth: 178,
+    width: "100%",
+    maxWidth: 360,
     height: 48,
     borderRadius: 4,
     backgroundColor: "#a9a9a9",
