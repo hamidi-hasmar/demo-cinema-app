@@ -1,0 +1,39 @@
+import Constants from "expo-constants";
+import { Platform } from "react-native";
+
+import { MovieListResponse } from "../types";
+
+function getApiBaseUrl() {
+  const configuredUrl = process.env.EXPO_PUBLIC_API_URL;
+
+  if (configuredUrl) {
+    return configuredUrl.replace(/\/$/, "");
+  }
+
+  if (Platform.OS === "web") {
+    return "http://localhost:5000";
+  }
+
+  const hostUri = Constants.expoConfig?.hostUri;
+  const host = hostUri?.split(":")[0];
+
+  return host ? `http://${host}:5000` : "http://localhost:5000";
+}
+
+const API_BASE_URL = getApiBaseUrl();
+
+export async function fetchMovies() {
+  const response = await fetch(`${API_BASE_URL}/api/movies`);
+
+  if (!response.ok) {
+    throw new Error("Unable to load movies");
+  }
+
+  const result = (await response.json()) as MovieListResponse;
+
+  if (!result.success) {
+    throw new Error("Unable to load movies");
+  }
+
+  return result.data;
+}
