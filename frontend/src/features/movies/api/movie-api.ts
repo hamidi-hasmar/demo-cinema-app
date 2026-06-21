@@ -5,6 +5,7 @@ import {
   MovieBookingOptionsResponse,
   MovieListResponse,
   MovieResponse,
+  SeatLocksResponse,
 } from "../types";
 
 function getApiBaseUrl() {
@@ -72,4 +73,66 @@ export async function fetchMovieBookingOptions(movieId: number) {
   }
 
   return result.data;
+}
+
+export async function fetchSeatLocks(showtimeId: number) {
+  const response = await fetch(`${API_BASE_URL}/api/showtimes/${showtimeId}/seats`);
+
+  if (!response.ok) {
+    throw new Error("Unable to load seats");
+  }
+
+  const result = (await response.json()) as SeatLocksResponse;
+
+  if (!result.success) {
+    throw new Error("Unable to load seats");
+  }
+
+  return result.data.locks;
+}
+
+export async function lockSeat(showtimeId: number, seatNumber: string, clientId: string) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/showtimes/${showtimeId}/seats/${seatNumber}/lock`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ clientId }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Seat is no longer available");
+  }
+}
+
+export async function releaseSeat(showtimeId: number, seatNumber: string, clientId: string) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/showtimes/${showtimeId}/seats/${seatNumber}/lock`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ clientId }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Unable to release seat");
+  }
+}
+
+export function createSeatEvents(showtimeId: number, clientId: string) {
+  if (typeof EventSource === "undefined") {
+    return null;
+  }
+
+  return new EventSource(
+    `${API_BASE_URL}/api/showtimes/${showtimeId}/seats/events?clientId=${encodeURIComponent(
+      clientId,
+    )}`,
+  );
 }

@@ -71,3 +71,17 @@ export type MovieBookingOptionsResponse = {
   success: boolean;
   data: MovieBookingOptions;
 };
+
+export type SeatLock = {
+  seatNumber: string;
+  lockedBy: string;
+  status: string;
+  updatedAt: string;
+};
+
+export type SeatLocksResponse = {
+  success: boolean;
+  data: {
+    locks: SeatLock[];
+  };
+};

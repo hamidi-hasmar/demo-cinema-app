@@ -48,7 +48,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SortOrder = exports.ShowtimeScalarFieldEnum = exports.MovieScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.SortOrder = exports.SeatLockScalarFieldEnum = exports.ShowtimeScalarFieldEnum = exports.MovieScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -76,7 +76,8 @@ exports.JsonNull = runtime.JsonNull;
 exports.AnyNull = runtime.AnyNull;
 exports.ModelName = {
     Movie: 'Movie',
-    Showtime: 'Showtime'
+    Showtime: 'Showtime',
+    SeatLock: 'SeatLock'
 };
 /*
  * Enums
@@ -116,6 +117,15 @@ exports.ShowtimeScalarFieldEnum = {
     ticketType: 'ticketType',
     minPrice: 'minPrice',
     maxPrice: 'maxPrice',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.SeatLockScalarFieldEnum = {
+    id: 'id',
+    showtimeId: 'showtimeId',
+    seatNumber: 'seatNumber',
+    lockedBy: 'lockedBy',
+    status: 'status',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };

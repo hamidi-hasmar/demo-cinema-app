@@ -49,6 +49,20 @@ model Showtime {
   maxPrice   Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  seatLocks  SeatLock[]
 
   @@unique([movieId, location, cinemaHall, showDate, startTime])
+}
+
+model SeatLock {
+  id         Int      @id @default(autoincrement())
+  showtimeId Int
+  showtime   Showtime @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  seatNumber String
+  lockedBy   String
+  status     String   @default("LOCKED")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([showtimeId, seatNumber])
 }

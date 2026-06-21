@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useMovieBookingOptions } from "../hooks/use-movie-booking-options";
+import { useSeatLocks } from "../hooks/use-seat-locks";
 import {
   BookingDate,
   BookingHall,
@@ -70,13 +71,33 @@ export function MovieBookingScreen() {
 
   const availableDates = selectedHall?.dates ?? [];
   const availableTimes = selectedDate?.times ?? [];
+  const selectedShowtimeId = selectedTime?.id ?? null;
+  const {
+    clientId,
+    locks: seatLocks,
+    error: seatError,
+    toggleSeat,
+  } = useSeatLocks(selectedShowtimeId);
+  const selectedSeatNumbers = useMemo(
+    () =>
+      seatLocks
+        .filter((lock) => lock.lockedBy === clientId)
+        .map((lock) => lock.seatNumber)
+        .sort(),
+    [clientId, seatLocks],
+  );
   const monthLabel = useMemo(
     () => (selectedDate ? formatDateLabel(selectedDate.date).month : ""),
     [selectedDate],
   );
 
   const canProceed = Boolean(
-    selectedTicketType && selectedLocation && selectedHall && selectedDate && selectedTime,
+    selectedTicketType &&
+      selectedLocation &&
+      selectedHall &&
+      selectedDate &&
+      selectedTime &&
+      selectedSeatNumbers.length > 0,
   );
 
   return (
@@ -222,6 +243,15 @@ export function MovieBookingScreen() {
                 <LegendItem label="Unavailable" color="#777777" crossed />
                 <LegendItem label="Selected" color="#cfcfcf" />
               </View>
+
+              <CinemaSeatLayout
+                clientId={clientId}
+                locks={seatLocks}
+                selectedSeats={selectedSeatNumbers}
+                onSeatPress={toggleSeat}
+              />
+
+              {seatError && <Text style={styles.seatErrorText}>{seatError}</Text>}
             </ScrollView>
 
             <View style={styles.footer}>
@@ -237,6 +267,83 @@ export function MovieBookingScreen() {
           </>
         )}
       </SafeAreaView>
+    </View>
+  );
+}
+
+function CinemaSeatLayout({
+  clientId,
+  locks,
+  selectedSeats,
+  onSeatPress,
+}: {
+  clientId: string;
+  locks: Array<{ seatNumber: string; lockedBy: string }>;
+  selectedSeats: string[];
+  onSeatPress: (seatNumber: string) => void;
+}) {
+  const rows = ["A", "B", "C", "D", "E", "F", "G", "H"];
+  const columns = [1, 2, 3, 4, 5, 6, 7, 8];
+  const selectedSeatLabel = selectedSeats.length > 0 ? selectedSeats.join(", ") : "-";
+  const subtotal = selectedSeats.length * 2500;
+
+  function getSeatState(seatNumber: string) {
+    const lock = locks.find((seatLock) => seatLock.seatNumber === seatNumber);
+
+    if (!lock) {
+      return "available";
+    }
+
+    return lock.lockedBy === clientId ? "selected" : "unavailable";
+  }
+
+  return (
+    <View style={styles.seatLayout}>
+      <View style={styles.screenWrapper}>
+        <View style={styles.screenArc} />
+        <Text style={styles.screenText}>Screen</Text>
+      </View>
+
+      <View style={styles.seatGrid}>
+        {rows.map((row) => (
+          <View key={row} style={styles.seatRow}>
+            <Text style={styles.rowLabel}>{row}</Text>
+            <View style={styles.seatColumns}>
+              {columns.map((column) => {
+                const seatNumber = `${row}${column}`;
+                const seatState = getSeatState(seatNumber);
+
+                return (
+                  <Pressable
+                    key={seatNumber}
+                    disabled={seatState === "unavailable"}
+                    style={[
+                      styles.seat,
+                      seatState === "selected" && styles.selectedSeat,
+                      seatState === "unavailable" && styles.unavailableSeat,
+                    ]}
+                    onPress={() => onSeatPress(seatNumber)}>
+                    {seatState === "unavailable" && <Text style={styles.seatCross}>x</Text>}
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Text style={styles.rowLabel}>{row}</Text>
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.seatSummary}>
+        <View style={styles.summaryColumn}>
+          <Text style={styles.summaryLabel}>SEAT</Text>
+          <Text style={styles.summaryValue}>{selectedSeatLabel}</Text>
+        </View>
+        <View style={styles.summaryDivider} />
+        <View style={styles.summaryColumn}>
+          <Text style={styles.summaryLabel}>SUB-TOTAL</Text>
+          <Text style={styles.summaryValue}>RM {(subtotal / 100).toFixed(0)}</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -561,6 +668,112 @@ const styles = StyleSheet.create({
     color: "#bdbdbd",
     fontSize: 12,
     fontWeight: "700",
+  },
+  seatLayout: {
+    marginTop: 36,
+    paddingBottom: 28,
+  },
+  screenWrapper: {
+    alignItems: "center",
+    marginBottom: 22,
+  },
+  screenArc: {
+    width: "76%",
+    height: 54,
+    borderTopWidth: 12,
+    borderTopColor: "#bdbdbd",
+    borderRadius: 120,
+    backgroundColor: "#222222",
+    transform: [{ perspective: 180 }, { rotateX: "45deg" }],
+  },
+  screenText: {
+    marginTop: 4,
+    color: "#bdbdbd",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  seatGrid: {
+    gap: 13,
+    marginBottom: 34,
+  },
+  seatRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  rowLabel: {
+    width: 16,
+    color: "#ffffff",
+    fontSize: 13,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  seatColumns: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  seat: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    backgroundColor: "#3d3d3d",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  selectedSeat: {
+    backgroundColor: "#cfcfcf",
+  },
+  unavailableSeat: {
+    backgroundColor: "#707070",
+  },
+  seatCross: {
+    color: "#ffffff",
+    fontSize: 14,
+    lineHeight: 16,
+    fontWeight: "900",
+  },
+  seatSummary: {
+    alignSelf: "center",
+    minWidth: 236,
+    minHeight: 62,
+    borderWidth: 1,
+    borderColor: "#8d8d8d",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  summaryColumn: {
+    minWidth: 84,
+    alignItems: "center",
+    gap: 6,
+  },
+  summaryDivider: {
+    width: 1,
+    height: 42,
+    backgroundColor: "#8d8d8d",
+    marginHorizontal: 16,
+  },
+  summaryLabel: {
+    color: "#bdbdbd",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  summaryValue: {
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "900",
+  },
+  seatErrorText: {
+    color: "#ffffff",
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "800",
+    textAlign: "center",
+    marginTop: 10,
   },
   footer: {
     position: "absolute",
