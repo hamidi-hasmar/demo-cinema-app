@@ -21,6 +21,14 @@ model Movie {
   genre           String
   rating          String
   posterUrl       String
+  trailerUrl      String   @default("")
+  cast            String   @default("")
+  director        String   @default("")
+  writers         String   @default("")
+  averageRating   Float    @default(0)
+  reviewCount     Int      @default(0)
+  ratingBreakdown String   @default("[]")
+  reviews         String   @default("[]")
   releaseDate     DateTime
   isNowShowing    Boolean  @default(true)
   createdAt       DateTime @default(now())

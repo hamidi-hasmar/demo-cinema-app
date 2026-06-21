@@ -1,4 +1,5 @@
 import { SymbolView } from "expo-symbols";
+import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,7 +14,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { MovieSection } from "../components/movie-section";
+import { MovieBottomNav } from "../components/movie-bottom-nav";
 import { useMovies } from "../hooks/use-movies";
+import { Movie } from "../types";
 
 const TAB_BAR_HEIGHT = Platform.select({ ios: 78, android: 82, web: 82, default: 0 });
 
@@ -38,6 +41,11 @@ export function MovieListScreen() {
   const newReleases = filteredMovies.slice(0, 4);
   const popularMovies = [...filteredMovies].reverse().slice(0, 4);
   const recommendedMovies = filteredMovies.slice(1).concat(filteredMovies.slice(0, 1));
+  const openMovie = (movie: Movie) =>
+    router.push({
+      pathname: "/movies/[id]",
+      params: { id: String(movie.id) },
+    });
 
   return (
     <View style={styles.root}>
@@ -87,12 +95,21 @@ export function MovieListScreen() {
             </View>
           ) : (
             <View style={styles.sections}>
-              <MovieSection title="New Releases" movies={newReleases} />
-              <MovieSection title="Popular in cinemas" movies={popularMovies} />
-              <MovieSection title="Recommended for you" movies={recommendedMovies} />
+              <MovieSection title="New Releases" movies={newReleases} onMoviePress={openMovie} />
+              <MovieSection
+                title="Popular in cinemas"
+                movies={popularMovies}
+                onMoviePress={openMovie}
+              />
+              <MovieSection
+                title="Recommended for you"
+                movies={recommendedMovies}
+                onMoviePress={openMovie}
+              />
             </View>
           )}
         </ScrollView>
+        <MovieBottomNav />
       </SafeAreaView>
     </View>
   );

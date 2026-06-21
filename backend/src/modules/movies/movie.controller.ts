@@ -29,7 +29,7 @@ function normalizeMoviePayload(
 ): Partial<MoviePayload> {
   const payload: Partial<MoviePayload> = {};
 
-  const stringFields = [
+  const requiredStringFields = [
     "title",
     "synopsis",
     "language",
@@ -38,7 +38,16 @@ function normalizeMoviePayload(
     "posterUrl",
   ] as const;
 
-  for (const field of stringFields) {
+  const optionalStringFields = [
+    "trailerUrl",
+    "cast",
+    "director",
+    "writers",
+    "ratingBreakdown",
+    "reviews",
+  ] as const;
+
+  for (const field of requiredStringFields) {
     const value = body[field];
 
     if (value === undefined) {
@@ -50,6 +59,20 @@ function normalizeMoviePayload(
 
     if (typeof value !== "string" || value.trim().length === 0) {
       throw new AppError(`${field} must be a non-empty string`, 400);
+    }
+
+    payload[field] = value.trim();
+  }
+
+  for (const field of optionalStringFields) {
+    const value = body[field];
+
+    if (value === undefined) {
+      continue;
+    }
+
+    if (typeof value !== "string") {
+      throw new AppError(`${field} must be a string`, 400);
     }
 
     payload[field] = value.trim();
@@ -77,6 +100,22 @@ function normalizeMoviePayload(
     payload.releaseDate = releaseDate;
   } else if (!isPartial) {
     throw new AppError("releaseDate is required", 400);
+  }
+
+  const numberFields = ["averageRating", "reviewCount"] as const;
+
+  for (const field of numberFields) {
+    if (body[field] === undefined) {
+      continue;
+    }
+
+    const value = Number(body[field]);
+
+    if (!Number.isFinite(value) || value < 0) {
+      throw new AppError(`${field} must be a positive number`, 400);
+    }
+
+    payload[field] = field === "reviewCount" ? Math.floor(value) : value;
   }
 
   if (body.isNowShowing !== undefined) {

@@ -6,9 +6,10 @@ import { Movie } from "../types";
 type MovieSectionProps = {
   title: string;
   movies: Movie[];
+  onMoviePress?: (movie: Movie) => void;
 };
 
-export function MovieSection({ title, movies }: MovieSectionProps) {
+export function MovieSection({ title, movies, onMoviePress }: MovieSectionProps) {
   return (
     <View style={styles.section}>
       <View style={styles.header}>
@@ -21,7 +22,7 @@ export function MovieSection({ title, movies }: MovieSectionProps) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.list}>
         {movies.map((movie) => (
-          <MovieCard key={`${title}-${movie.id}`} movie={movie} />
+          <MovieCard key={`${title}-${movie.id}`} movie={movie} onPress={onMoviePress} />
         ))}
       </ScrollView>
     </View>

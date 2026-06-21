@@ -5,11 +5,14 @@ import { Movie } from "../types";
 
 type MovieCardProps = {
   movie: Movie;
+  onPress?: (movie: Movie) => void;
 };
 
-export function MovieCard({ movie }: MovieCardProps) {
+export function MovieCard({ movie, onPress }: MovieCardProps) {
   return (
-    <Pressable style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+    <Pressable
+      onPress={() => onPress?.(movie)}
+      style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
       <Image source={{ uri: movie.posterUrl }} style={styles.poster} contentFit="cover" />
       <View style={styles.infoRow}>
         <Text style={styles.title} numberOfLines={2}>

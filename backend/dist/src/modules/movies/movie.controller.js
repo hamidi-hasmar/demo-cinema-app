@@ -19,7 +19,7 @@ function parseMovieId(value) {
 }
 function normalizeMoviePayload(body, isPartial = false) {
     const payload = {};
-    const stringFields = [
+    const requiredStringFields = [
         "title",
         "synopsis",
         "language",
@@ -27,7 +27,15 @@ function normalizeMoviePayload(body, isPartial = false) {
         "rating",
         "posterUrl",
     ];
-    for (const field of stringFields) {
+    const optionalStringFields = [
+        "trailerUrl",
+        "cast",
+        "director",
+        "writers",
+        "ratingBreakdown",
+        "reviews",
+    ];
+    for (const field of requiredStringFields) {
         const value = body[field];
         if (value === undefined) {
             if (!isPartial) {
@@ -37,6 +45,16 @@ function normalizeMoviePayload(body, isPartial = false) {
         }
         if (typeof value !== "string" || value.trim().length === 0) {
             throw new AppError_1.AppError(`${field} must be a non-empty string`, 400);
+        }
+        payload[field] = value.trim();
+    }
+    for (const field of optionalStringFields) {
+        const value = body[field];
+        if (value === undefined) {
+            continue;
+        }
+        if (typeof value !== "string") {
+            throw new AppError_1.AppError(`${field} must be a string`, 400);
         }
         payload[field] = value.trim();
     }
@@ -59,6 +77,17 @@ function normalizeMoviePayload(body, isPartial = false) {
     }
     else if (!isPartial) {
         throw new AppError_1.AppError("releaseDate is required", 400);
+    }
+    const numberFields = ["averageRating", "reviewCount"];
+    for (const field of numberFields) {
+        if (body[field] === undefined) {
+            continue;
+        }
+        const value = Number(body[field]);
+        if (!Number.isFinite(value) || value < 0) {
+            throw new AppError_1.AppError(`${field} must be a positive number`, 400);
+        }
+        payload[field] = field === "reviewCount" ? Math.floor(value) : value;
     }
     if (body.isNowShowing !== undefined) {
         if (typeof body.isNowShowing !== "boolean") {

@@ -9,6 +9,14 @@ export type MoviePayload = {
   genre: string;
   rating: string;
   posterUrl: string;
+  trailerUrl?: string;
+  cast?: string;
+  director?: string;
+  writers?: string;
+  averageRating?: number;
+  reviewCount?: number;
+  ratingBreakdown?: string;
+  reviews?: string;
   releaseDate: Date;
   isNowShowing?: boolean;
 };
@@ -30,6 +38,8 @@ export async function getMovieList() {
       genre: true,
       rating: true,
       posterUrl: true,
+      averageRating: true,
+      reviewCount: true,
       releaseDate: true,
       isNowShowing: true,
     },

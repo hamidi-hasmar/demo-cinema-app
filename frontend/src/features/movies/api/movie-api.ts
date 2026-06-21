@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
-import { MovieListResponse } from "../types";
+import { MovieListResponse, MovieResponse } from "../types";
 
 function getApiBaseUrl() {
   const configuredUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -33,6 +33,22 @@ export async function fetchMovies() {
 
   if (!result.success) {
     throw new Error("Unable to load movies");
+  }
+
+  return result.data;
+}
+
+export async function fetchMovie(movieId: number) {
+  const response = await fetch(`${API_BASE_URL}/api/movies/${movieId}`);
+
+  if (!response.ok) {
+    throw new Error("Unable to load movie");
+  }
+
+  const result = (await response.json()) as MovieResponse;
+
+  if (!result.success) {
+    throw new Error("Unable to load movie");
   }
 
   return result.data;

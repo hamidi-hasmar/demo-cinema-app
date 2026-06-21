@@ -27,6 +27,8 @@ async function getMovieList() {
             genre: true,
             rating: true,
             posterUrl: true,
+            averageRating: true,
+            reviewCount: true,
             releaseDate: true,
             isNowShowing: true,
         },
