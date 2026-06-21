@@ -3,6 +3,7 @@ import {
   editMovie,
   listMovies,
   removeMovie,
+  showMovieBookingOptions,
   showMovie,
   storeMovie,
 } from "./movie.controller";
@@ -10,6 +11,7 @@ import {
 const router = Router();
 
 router.get("/", listMovies);
+router.get("/:id/booking-options", showMovieBookingOptions);
 router.get("/:id", showMovie);
 router.post("/", storeMovie);
 router.patch("/:id", editMovie);

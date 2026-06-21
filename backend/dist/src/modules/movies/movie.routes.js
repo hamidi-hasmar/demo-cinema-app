@@ -4,6 +4,7 @@ const express_1 = require("express");
 const movie_controller_1 = require("./movie.controller");
 const router = (0, express_1.Router)();
 router.get("/", movie_controller_1.listMovies);
+router.get("/:id/booking-options", movie_controller_1.showMovieBookingOptions);
 router.get("/:id", movie_controller_1.showMovie);
 router.post("/", movie_controller_1.storeMovie);
 router.patch("/:id", movie_controller_1.editMovie);

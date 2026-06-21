@@ -35,3 +35,39 @@ export type MovieReview = {
   title: string;
   comment: string;
 };
+
+export type BookingTime = {
+  id: number;
+  startTime: string;
+};
+
+export type BookingDate = {
+  date: string;
+  times: BookingTime[];
+};
+
+export type BookingHall = {
+  name: string;
+  dates: BookingDate[];
+};
+
+export type BookingLocation = {
+  name: string;
+  halls: BookingHall[];
+};
+
+export type BookingTicketType = {
+  label: string;
+  minPrice: number;
+  maxPrice: number;
+};
+
+export type MovieBookingOptions = {
+  ticketTypes: BookingTicketType[];
+  locations: BookingLocation[];
+};
+
+export type MovieBookingOptionsResponse = {
+  success: boolean;
+  data: MovieBookingOptions;
+};

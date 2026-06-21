@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listMovies = listMovies;
 exports.showMovie = showMovie;
+exports.showMovieBookingOptions = showMovieBookingOptions;
 exports.storeMovie = storeMovie;
 exports.editMovie = editMovie;
 exports.removeMovie = removeMovie;
@@ -118,6 +119,18 @@ async function showMovie(req, res, next) {
         return res.status(200).json({
             success: true,
             data: movie,
+        });
+    }
+    catch (error) {
+        return next(error);
+    }
+}
+async function showMovieBookingOptions(req, res, next) {
+    try {
+        const bookingOptions = await (0, movie_service_1.getMovieBookingOptions)(parseMovieId(req.params.id));
+        return res.status(200).json({
+            success: true,
+            data: bookingOptions,
         });
     }
     catch (error) {

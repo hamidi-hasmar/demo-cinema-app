@@ -33,4 +33,22 @@ model Movie {
   isNowShowing    Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  showtimes       Showtime[]
+}
+
+model Showtime {
+  id         Int      @id @default(autoincrement())
+  movieId    Int
+  movie      Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  location   String
+  cinemaHall String
+  showDate   DateTime
+  startTime  String
+  ticketType String
+  minPrice   Int
+  maxPrice   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([movieId, location, cinemaHall, showDate, startTime])
 }

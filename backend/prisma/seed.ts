@@ -143,14 +143,166 @@ const movies = [
   },
 ];
 
+const movieShowtimes: Record<
+  string,
+  Array<{
+    location: string;
+    cinemaHall: string;
+    showDate: Date;
+    startTime: string;
+    ticketType: string;
+    minPrice: number;
+    maxPrice: number;
+  }>
+> = {
+  "The Last Voyage": [
+    {
+      location: "Kuala Lumpur",
+      cinemaHall: "Hall 1 - Pavilion KL",
+      showDate: new Date("2026-06-22"),
+      startTime: "9:20AM",
+      ticketType: "Standard",
+      minPrice: 2000,
+      maxPrice: 5000,
+    },
+    {
+      location: "Kuala Lumpur",
+      cinemaHall: "Hall 1 - Pavilion KL",
+      showDate: new Date("2026-06-22"),
+      startTime: "1:20PM",
+      ticketType: "Standard",
+      minPrice: 2000,
+      maxPrice: 5000,
+    },
+    {
+      location: "Kuala Lumpur",
+      cinemaHall: "Hall 2 - TRX",
+      showDate: new Date("2026-06-23"),
+      startTime: "7:30PM",
+      ticketType: "Premium",
+      minPrice: 3000,
+      maxPrice: 6500,
+    },
+    {
+      location: "Petaling Jaya",
+      cinemaHall: "Hall 4 - 1 Utama",
+      showDate: new Date("2026-06-24"),
+      startTime: "5:40PM",
+      ticketType: "Standard",
+      minPrice: 2000,
+      maxPrice: 5000,
+    },
+  ],
+  "Midnight Kopitiam": [
+    {
+      location: "Petaling Jaya",
+      cinemaHall: "Hall 3 - The Curve",
+      showDate: new Date("2026-06-22"),
+      startTime: "11:40AM",
+      ticketType: "Standard",
+      minPrice: 1800,
+      maxPrice: 4500,
+    },
+    {
+      location: "Petaling Jaya",
+      cinemaHall: "Hall 3 - The Curve",
+      showDate: new Date("2026-06-23"),
+      startTime: "3:30PM",
+      ticketType: "Standard",
+      minPrice: 1800,
+      maxPrice: 4500,
+    },
+    {
+      location: "Shah Alam",
+      cinemaHall: "Hall 5 - Setia City Mall",
+      showDate: new Date("2026-06-24"),
+      startTime: "9:20PM",
+      ticketType: "Premium",
+      minPrice: 2500,
+      maxPrice: 5500,
+    },
+  ],
+  "Operation Monsoon": [
+    {
+      location: "Kuala Lumpur",
+      cinemaHall: "Hall 6 - Mid Valley",
+      showDate: new Date("2026-06-22"),
+      startTime: "1:20PM",
+      ticketType: "Standard",
+      minPrice: 2200,
+      maxPrice: 5200,
+    },
+    {
+      location: "Kuala Lumpur",
+      cinemaHall: "Hall 6 - Mid Valley",
+      showDate: new Date("2026-06-22"),
+      startTime: "7:30PM",
+      ticketType: "Standard",
+      minPrice: 2200,
+      maxPrice: 5200,
+    },
+    {
+      location: "Subang Jaya",
+      cinemaHall: "Hall 2 - Sunway Pyramid",
+      showDate: new Date("2026-06-25"),
+      startTime: "9:20PM",
+      ticketType: "Premium",
+      minPrice: 3200,
+      maxPrice: 6800,
+    },
+  ],
+  "Little Lanterns": [
+    {
+      location: "Kuala Lumpur",
+      cinemaHall: "Hall 7 - Suria KLCC",
+      showDate: new Date("2026-06-22"),
+      startTime: "9:20AM",
+      ticketType: "Family",
+      minPrice: 1500,
+      maxPrice: 4200,
+    },
+    {
+      location: "Kuala Lumpur",
+      cinemaHall: "Hall 7 - Suria KLCC",
+      showDate: new Date("2026-06-23"),
+      startTime: "11:40AM",
+      ticketType: "Family",
+      minPrice: 1500,
+      maxPrice: 4200,
+    },
+    {
+      location: "Petaling Jaya",
+      cinemaHall: "Hall 1 - Paradigm Mall",
+      showDate: new Date("2026-06-24"),
+      startTime: "5:40PM",
+      ticketType: "Standard",
+      minPrice: 1800,
+      maxPrice: 4500,
+    },
+  ],
+};
+
 async function main() {
   for (const movie of movies) {
-    await prisma.movie.upsert({
+    const savedMovie = await prisma.movie.upsert({
       where: {
         title: movie.title,
       },
       update: movie,
       create: movie,
+    });
+
+    await prisma.showtime.deleteMany({
+      where: {
+        movieId: savedMovie.id,
+      },
+    });
+
+    await prisma.showtime.createMany({
+      data: movieShowtimes[movie.title].map((showtime) => ({
+        ...showtime,
+        movieId: savedMovie.id,
+      })),
     });
   }
 }

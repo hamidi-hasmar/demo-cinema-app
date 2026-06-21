@@ -3,6 +3,7 @@ import { AppError } from "../../utils/AppError";
 import {
   createMovie,
   deleteMovie,
+  getMovieBookingOptions,
   getMovieById,
   getMovieList,
   MoviePayload,
@@ -161,6 +162,23 @@ export async function showMovie(
     return res.status(200).json({
       success: true,
       data: movie,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function showMovieBookingOptions(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const bookingOptions = await getMovieBookingOptions(parseMovieId(req.params.id));
+
+    return res.status(200).json({
+      success: true,
+      data: bookingOptions,
     });
   } catch (error) {
     return next(error);

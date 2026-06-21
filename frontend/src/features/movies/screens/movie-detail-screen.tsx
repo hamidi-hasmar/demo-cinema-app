@@ -155,7 +155,14 @@ export function MovieDetailScreen() {
             </ScrollView>
 
             <View style={styles.bottomBar}>
-              <Pressable style={styles.bookButton}>
+              <Pressable
+                style={styles.bookButton}
+                onPress={() =>
+                  router.push({
+                    pathname: "/movies/booking/[id]",
+                    params: { id: String(movie.id) },
+                  })
+                }>
                 <Text style={styles.bookText}>Book Ticket</Text>
               </Pressable>
             </View>
